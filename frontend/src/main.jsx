@@ -10,6 +10,7 @@ import Login from './pages/Login.jsx'
 import SignUp from './pages/SignUp.jsx'
 import Lobby from './pages/Lobby.jsx'
 import Room from './pages/Room.jsx'
+import Header from './components/Header/Header.jsx'
 
 const router = createBrowserRouter([
   {
@@ -18,15 +19,26 @@ const router = createBrowserRouter([
     children : [
       {
         path : "/" , 
-        element : <Home/>
+        element : <>
+        <Header/>
+        <Home/>
+        </>
+        
       } , 
        {
         path : "/login" , 
-        element : <Login/>
+        element : 
+        <>
+    <Header/>
+        <Login/>
+        </>
       } , 
        {
         path : "/signup" , 
-        element : <SignUp/>
+        element : <>
+        <Header/>
+        <SignUp/>
+        </>
       } , 
        {
         path : "/lobby/:roomId" , 

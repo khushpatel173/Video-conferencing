@@ -1,6 +1,5 @@
 
-import React , {useRef} from 'react'
-import { useState } from 'react';
+import {useRef} from 'react'
 import { useEffect } from 'react';
 import { useParams } from 'react-router-dom'
 import { useContext } from 'react';
@@ -70,23 +69,44 @@ function Lobby() {
         }
     }
   return (
-    <>
-        {isAudio ? (<i className="fa-solid fa-microphone" onClick={toggleMic}></i>) : (<i className="fa-solid fa-microphone-slash" onClick={toggleMic}></i>)}
-
-        {isVideo ? <i className="fa-solid fa-video" onClick={toggleVideo}></i> : <i className="fa-solid fa-video-slash" onClick={toggleVideo}></i>}
-
-        {/* this will be the video ref */}
-        <video
+    <main className="page-shell lobby-page">
+        <section className="lobby-layout">
+            <div className="preview-card">
+                <div className="video-stage">
+                    {/* this will be the video ref */}
+                    <video
     ref={videoRef}
     autoPlay
     muted
     playsInline
 />
-        Enter your Name :<input type="text" placeholder='name' value={name} onChange={(e)=>{setName(e.target.value)}}/>
-        <button onClick={()=>{
+                    {!isVideo && <div className="camera-off">Camera off</div>}
+                </div>
+
+                <div className="call-controls">
+                    <button className={`control-btn ${!isAudio ? 'is-off' : ''}`} onClick={toggleMic} aria-label={isAudio ? 'Mute microphone' : 'Unmute microphone'}>
+        {isAudio ? (<i className="fa-solid fa-microphone"></i>) : (<i className="fa-solid fa-microphone-slash"></i>)}
+                    </button>
+
+                    <button className={`control-btn ${!isVideo ? 'is-off' : ''}`} onClick={toggleVideo} aria-label={isVideo ? 'Turn camera off' : 'Turn camera on'}>
+        {isVideo ? <i className="fa-solid fa-video"></i> : <i className="fa-solid fa-video-slash"></i>}
+                    </button>
+                </div>
+            </div>
+
+            <div className="lobby-panel">
+                <p className="eyebrow">Ready room</p>
+                <h1>Check your setup before joining.</h1>
+                <p className="hero-text">Room ID: <span>{roomId}</span></p>
+
+                <label className="field-label" htmlFor="display-name">Display name</label>
+        <input id="display-name" className="app-input" type="text" placeholder='Your name' value={name} onChange={(e)=>{setName(e.target.value)}}/>
+        <button className="primary-btn wide-btn" onClick={()=>{
             navigate(`/room/${roomId}`)
-        }}>Join</button>
-    </>
+        }}>Join meeting</button>
+            </div>
+        </section>
+    </main>
   )
 }
 

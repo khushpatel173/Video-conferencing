@@ -1,4 +1,3 @@
-import React from 'react'
 import authService from '../../services/auth'
 import { useDispatch } from 'react-redux';
 import { logout } from '../../../store/authSlice';
@@ -16,7 +15,7 @@ function LogoutBtn() {
     }
     }
   return (
-    <button onClick={onLogout}>Logout</button>
+    <button className="nav-link danger-link" onClick={onLogout}>Logout</button>
   )
 }
 

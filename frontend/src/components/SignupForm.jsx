@@ -1,22 +1,24 @@
-import React from 'react'
 import {useForm} from 'react-hook-form'
 import authService from '../services/auth';
 import './LoginForm.css'
 function SignupForm() {
     const {register , handleSubmit} = useForm();
     const onSubmit = async(data)=>{
-      const res =  await authService.signup(data);
+      await authService.signup(data);
     }
   return (
-    <div className='container'>
-      <p className='txt'>SignUp</p>
-         <input type="text" {...register("username")} placeholder='username' className='input'/>
-        <br />
-         <input type="email" {...register("email")} placeholder='Email' className='input'/>
-        <br />
-         <input type="password" {...register("password")} placeholder='password' className='input'/>
-        <br />
-        <button onClick={handleSubmit(onSubmit)} className='submit-btn'>Sign up</button>
+    <div className='auth-card'>
+      <div className="auth-heading">
+        <p className='eyebrow'>Create account</p>
+        <h1 className='auth-title'>Sign up</h1>
+      </div>
+         <label className="field-label" htmlFor="signup-username">Username</label>
+         <input id="signup-username" type="text" {...register("username")} placeholder='Username' className='app-input'/>
+         <label className="field-label" htmlFor="signup-email">Email</label>
+         <input id="signup-email" type="email" {...register("email")} placeholder='Email' className='app-input'/>
+         <label className="field-label" htmlFor="signup-password">Password</label>
+         <input id="signup-password" type="password" {...register("password")} placeholder='Password' className='app-input'/>
+        <button onClick={handleSubmit(onSubmit)} className='primary-btn wide-btn'>Sign up</button>
     </div>
   )
 }

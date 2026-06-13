@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useContext } from 'react'
 import MediaContext from '../contexts/MediaContext'
 import socket from '../services/socket';
@@ -7,12 +7,11 @@ import { useRef } from 'react';
 import VideoPlayer from '../components/VideoPlayer';
 
 function Room() {
-    const {isAudio , isVideo , stream , setStream , setIsAudio , setIsVideo , name , setName} = useContext(MediaContext);
+    const {isAudio , isVideo , stream , setIsAudio , setIsVideo , name} = useContext(MediaContext);
     const {roomId} = useParams();
     const localVideoRef = useRef(null);
     const peerConnections = useRef({});
     const [participants , setParticipants] = useState([]);
-    const [remoteStreams , setRemoteStreams] = useState({});
     const createPeerConnection = (userId) => {
 
     const pc = new RTCPeerConnection({
@@ -208,32 +207,43 @@ return () => {
         }
     }
   return (
-    <>
-    <p>Local Stream :</p>
+    <main className="room-page">
+        <section className="room-topbar">
+            <div>
+                <p className="panel-kicker">Room</p>
+                <h1>{roomId}</h1>
+            </div>
+            <div className="room-status">
+                <span className="status-dot"></span>
+                <p>{Object.keys(participants).length} in call</p>
+            </div>
+        </section>
 
-    <p>{name}</p>
-    {isAudio ? (<i className="fa-solid fa-microphone" onClick={toggleMic}></i>) : (<i className="fa-solid fa-microphone-slash" onClick={toggleMic}></i>)}
-
-        {isVideo ? <i className="fa-solid fa-video" onClick={toggleVideo}></i> : <i className="fa-solid fa-video-slash" onClick={toggleVideo}></i>}
-    <video
+        <section className="video-grid">
+            <article className="video-tile local-tile">
+                <video
     ref={localVideoRef}
     autoPlay
     muted
     playsInline
 />
-  <p>Remote Stream :</p>
+                {!isVideo && <div className="camera-off">Camera off</div>}
+                <div className="tile-name">{name || 'You'}</div>
+            </article>
+
   {/* <video
     ref={remoteVideoRef}
     autoPlay
     playsInline
 /> */}
+
+{console.log("Participants:", participants)}
    {
     Object.entries(participants)
     .filter(([userId]) => userId !== socket.id)
         .map(([userId, participant]) => (
 
-            <div key={userId}>
-                <p>{participant.name}</p>
+            <article className="video-tile" key={userId}>
 
                 {
                     participant.stream &&
@@ -243,13 +253,25 @@ return () => {
                         />
                     )
                 }
+                {!participant.stream && <div className="waiting-tile">Waiting for video</div>}
+                <div className="tile-name">{participant.name}</div>
 
-            </div>
+            </article>
 
         ))
 }
+        </section>
 
-    </>
+        <section className="room-controls">
+            <button className={`control-btn ${!isAudio ? 'is-off' : ''}`} onClick={toggleMic} aria-label={isAudio ? 'Mute microphone' : 'Unmute microphone'}>
+    {isAudio ? (<i className="fa-solid fa-microphone"></i>) : (<i className="fa-solid fa-microphone-slash"></i>)}
+            </button>
+
+            <button className={`control-btn ${!isVideo ? 'is-off' : ''}`} onClick={toggleVideo} aria-label={isVideo ? 'Turn camera off' : 'Turn camera on'}>
+        {isVideo ? <i className="fa-solid fa-video"></i> : <i className="fa-solid fa-video-slash"></i>}
+            </button>
+        </section>
+    </main>
   )
 }
 export default Room

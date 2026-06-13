@@ -1,4 +1,3 @@
-import React from 'react'
 import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom';
 import './Header.css'
@@ -24,24 +23,28 @@ function Header() {
   },
   ]
   return (
-    <>
-      <div className='container'>
+    <header className='app-header'>
+      <div className="brand" onClick={()=> navigate("/")}>
+        <span className="brand-mark"><i className="fa-solid fa-video"></i></span>
+        <span>MeetFlow</span>
+      </div>
+      <nav className='header-nav' aria-label="Main navigation">
       {/* <p>Login</p>
       <p>Signup</p>
       <p>Home</p>
       <p>Logout</p> */}
       {navItems.map((item , idx)=>(
         item.active ? (
-        <p onClick={()=>{
+        <button className="nav-link" onClick={()=>{
           navigate(item.slug)
-        }} key={idx}>{item.name}</p>
+        }} key={idx}>{item.name}</button>
       
       ) : null
       ))}
     {userStatus && <LogoutBtn/>}
 
-      </div>
-    </>
+      </nav>
+    </header>
   )
 }
 

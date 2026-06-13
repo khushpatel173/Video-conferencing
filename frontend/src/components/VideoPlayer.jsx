@@ -16,6 +16,7 @@ function VideoPlayer({ stream }) {
 
     return (
         <video
+            className="remote-video"
             ref={videoRef}
             autoPlay
             playsInline
