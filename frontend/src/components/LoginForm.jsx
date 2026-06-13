@@ -2,9 +2,11 @@ import { useForm } from 'react-hook-form'
 import authService from '../services/auth'
 import { login } from '../../store/authSlice'
 import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import './LoginForm.css'
 function LoginForm() {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const onSubmit = async(data)=>{
         const res = await authService.login(data);
        if(!res.user){
@@ -12,6 +14,7 @@ function LoginForm() {
         return null;
        }
        dispatch(login(res.user));
+       navigate('/');
     }
   
     const {register , handleSubmit} = useForm();

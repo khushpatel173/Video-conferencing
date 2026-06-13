@@ -1,10 +1,21 @@
 import {useForm} from 'react-hook-form'
 import authService from '../services/auth';
+import { useDispatch } from 'react-redux';
+import { login } from '../../store/authSlice';
+import { useNavigate} from 'react-router-dom';
 import './LoginForm.css'
 function SignupForm() {
     const {register , handleSubmit} = useForm();
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
     const onSubmit = async(data)=>{
-      await authService.signup(data);
+      const res = await authService.signup(data);
+      if(!res.user){
+              console.log("Error Siggning  up");
+              return null;
+             }
+             dispatch(login(res.user));
+             navigate('/');
     }
   return (
     <div className='auth-card'>

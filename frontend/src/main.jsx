@@ -11,6 +11,7 @@ import SignUp from './pages/SignUp.jsx'
 import Lobby from './pages/Lobby.jsx'
 import Room from './pages/Room.jsx'
 import Header from './components/Header/Header.jsx'
+import AuthLayout from './components/AuthLayout.jsx'
 
 const router = createBrowserRouter([
   {
@@ -21,7 +22,9 @@ const router = createBrowserRouter([
         path : "/" , 
         element : <>
         <Header/>
+        <AuthLayout authentication={true}>
         <Home/>
+        </AuthLayout>
         </>
         
       } , 
@@ -30,23 +33,31 @@ const router = createBrowserRouter([
         element : 
         <>
     <Header/>
+       <AuthLayout authentication={false}>
         <Login/>
+        </AuthLayout>
         </>
       } , 
        {
         path : "/signup" , 
         element : <>
         <Header/>
+       <AuthLayout authentication={false}>
         <SignUp/>
+        </AuthLayout>
         </>
       } , 
        {
         path : "/lobby/:roomId" , 
-        element : <Lobby/>
+        element : <AuthLayout authentication={true}>
+        <Lobby/>
+        </AuthLayout>
       } , 
        {
         path : "/room/:roomId" , 
-        element : <Room/>
+        element : <AuthLayout authentication={true}>
+        <Room/>
+        </AuthLayout>
       } , 
 
     ]
