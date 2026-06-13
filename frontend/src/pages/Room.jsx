@@ -5,13 +5,16 @@ import socket from '../services/socket';
 import { useParams } from 'react-router-dom';
 import { useRef } from 'react';
 import VideoPlayer from '../components/VideoPlayer';
+import { useNavigate } from 'react-router-dom';
+
 
 function Room() {
-    const {isAudio , isVideo , stream , setIsAudio , setIsVideo , name} = useContext(MediaContext);
+    const {isAudio , isVideo , stream , setIsAudio , setIsVideo , name , setStream} = useContext(MediaContext);
     const {roomId} = useParams();
     const localVideoRef = useRef(null);
     const peerConnections = useRef({});
     const [participants , setParticipants] = useState([]);
+    const navigate = useNavigate();
     const createPeerConnection = (userId) => {
 
     const pc = new RTCPeerConnection({
@@ -148,6 +151,23 @@ if (!pc) return;
 await pc.addIceCandidate(candidate);
     }
 );
+socket.on("user-left" , ({userId})=>{
+
+
+    const pc = peerConnections.current[userId];
+    pc?.close();
+    stream?.getTracks()
+    .forEach(track =>
+        track.stop()
+    );
+    delete peerConnections.current[userId];
+    setParticipants(prev => {
+        const updated = {...prev};
+        delete updated[userId];
+        return updated;
+    })
+     console.log("User left ");
+})
 socket.on(
     "existing-users",
     (users) => {
@@ -206,6 +226,22 @@ return () => {
             stream.getVideoTracks()[0].enabled = true;
         }
     }
+    const leaveMeeting = ()=>{
+        socket.emit("leave-room");
+          Object.values(peerConnections.current)
+        .forEach(pc => pc.close());
+
+        stream?.getTracks().forEach(track => {
+    console.log("Before:", track.readyState);
+
+    track.stop();
+
+    console.log("After:", track.readyState);
+});
+      
+        navigate("/");
+        setStream(null);
+    }
   return (
     <main className="room-page">
         <section className="room-topbar">
@@ -260,7 +296,7 @@ return () => {
 
         ))
 }
-        </section>
+        </section>              
 
         <section className="room-controls">
             <button className={`control-btn ${!isAudio ? 'is-off' : ''}`} onClick={toggleMic} aria-label={isAudio ? 'Mute microphone' : 'Unmute microphone'}>
@@ -269,6 +305,9 @@ return () => {
 
             <button className={`control-btn ${!isVideo ? 'is-off' : ''}`} onClick={toggleVideo} aria-label={isVideo ? 'Turn camera off' : 'Turn camera on'}>
         {isVideo ? <i className="fa-solid fa-video"></i> : <i className="fa-solid fa-video-slash"></i>}
+            </button>
+             <button className={`control-btn`} onClick={leaveMeeting}>
+            <i class="fa-solid fa-phone-slash"></i>
             </button>
         </section>
     </main>

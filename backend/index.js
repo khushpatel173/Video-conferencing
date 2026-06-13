@@ -167,12 +167,32 @@ if (!rooms[roomId]) {
     });
         socket.join(roomId);
         socket.data.name = name;
+        socket.data.roomId = roomId;
         socket.to(roomId).emit("user-joined" , {
             userId : socket.id , 
             name : name
         })
     }
 );
+
+socket.on("leave-room" , ()=>{
+    const roomId = socket.data.roomId;
+    if(!roomId) return;
+    rooms[roomId] = rooms[roomId].filter(user => user.userId !== socket.id);
+    if (
+    rooms[roomId] &&
+    rooms[roomId].length === 0
+) {
+    delete rooms[roomId];
+}
+    socket.to(roomId).emit(
+    "user-left",
+    {
+        userId: socket.id
+    }
+);
+})
+
 
 socket.on("offer" , ({target , offer})=>{
     io.to(target).emit("offer" , {
