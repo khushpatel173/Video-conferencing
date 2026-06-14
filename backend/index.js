@@ -67,12 +67,12 @@ app.post("/login" , async(req ,res)=>{
          const {username , password} = req.body;
     const user = await User.findOne({username : username});
     if(!user){
-        return res.json({message : "Incorrect credientials"});
+        return res.status(401).json({message : "Incorrect Username"});
     }
     const isMatch = await bcrypt.compare(password , user.password);
     
     if(!isMatch){
-      return res.json({message : "error in loggin in"});
+      return res.status(401).json({message : "Incorrect password"});
     }
     const token = jwt.sign({
         userId : user._id
@@ -85,7 +85,7 @@ app.post("/login" , async(req ,res)=>{
     user: user
 });
     } catch (error) {
-        res.json({error : "Error in loggin in"})
+        res.status(500).json({message : "Error in loggin in"});
     }
    
 })
@@ -226,4 +226,15 @@ socket.on("offer" , ({target , offer})=>{
         );
 });
 
+
+app.get("/check/:id" , (req ,res)=>{
+    const {id} = req.params;
+    // check if this id is in rooms or not
+    if(rooms[id]){
+        res.status(200).json({message : "Room exist with this id"});
+    }
+    else{
+        res.status(401).json({message : "Room does exist with this id"});
+    }
+})
 server.listen(8080);

@@ -7,7 +7,6 @@ import MediaContext from '../contexts/MediaContext';
 import { useNavigate } from 'react-router-dom';
 function Lobby() {
     const {roomId} = useParams(); 
-    console.log(roomId);
   const {isAudio , isVideo , stream , setStream , setIsAudio , setIsVideo , name , setName} = useContext(MediaContext);
     const videoRef = useRef(null);
     const navigate = useNavigate();

@@ -7,13 +7,24 @@ import { useNavigate } from 'react-router-dom';
 function Home() {
     const [meetingId , setMeetingId] = useState('');
     const [loading, setLoading] = useState(false);
+    const [message , setMessage] = useState("");
     const navigate = useNavigate();
-    const onJoin = ()=>{
+    const onJoin = async()=>{
        if (!meetingId.trim()) {
         return;
     }
             // directly take on the lobby page with the link
-        navigate(`/lobby/${meetingId}`);
+            // check if this roomId exist or not
+            try {
+                setMessage("");
+                 const res = await authService.checkId({id : meetingId});
+                console.log(res);
+              navigate(`/lobby/${meetingId}`);
+            } catch (error) {
+                console.log(error.response?.data?.message);
+                setMessage(error.response?.data?.message);
+            }
+       
     }
    const onNewMeeting = async () => {
     try {
@@ -36,12 +47,14 @@ function Home() {
                 <p className="eyebrow">Secure video meetings</p>
                 <h1 id="home-title">Start or join a meeting in seconds.</h1>
                 <p className="hero-text">A focused space for quick calls, lobby checks, and clear meeting controls.</p>
+                
             </div>
 
             <div className="meeting-panel">
                 <div className="panel-header">
                     <span className="panel-icon"><i className="fa-solid fa-video"></i></span>
                     <div>
+                        {message && <p>{message}</p>}
                         <p className="panel-kicker">Meeting access</p>
                         <h2>Join a room</h2>
                     </div>

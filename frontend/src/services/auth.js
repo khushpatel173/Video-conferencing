@@ -6,7 +6,7 @@ class AuthService{
         return res.data
     }   
         async login({username , password}){
-        const res = await axios.post("http://localhost:8080/login" , {username , password} , {withCredentials : true});
+        const res = await axios.post("http://localhost:8080/login" , {username , password} , {withCredentials : true}); 
         return res.data;
     }
      async getCurrrentUser(){
@@ -20,6 +20,10 @@ class AuthService{
     async generateId(){
         const res = await axios.get("http://localhost:8080/generateId");
        return res.data;
+    }
+    async checkId({id}){
+        const res = await axios.get(`http://localhost:8080/check/${id}`);
+        return res.data;
     }
 }
 
