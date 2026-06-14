@@ -9,7 +9,6 @@ function App() {
   const dispatch = useDispatch();
  const getUser = async()=>{
     try {
-        dispatch(setLoading());
         const res = await authService.getCurrrentUser();
         const userData = res.user;
         if(!userData){
@@ -20,6 +19,8 @@ function App() {
 
     } catch {
         dispatch(logout())
+    } finally{
+      dispatch(setLoading());
     }
    }
     useEffect(()=>{

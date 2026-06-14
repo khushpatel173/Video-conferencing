@@ -35,6 +35,7 @@ main()
 //     console.log("Listening to the port" , PORT);    
 // });
 
+
 app.get("/" , (req , res)=>{
    res.send("hey there");
 })
@@ -176,21 +177,7 @@ if (!rooms[roomId]) {
 );
 
 socket.on("leave-room" , ()=>{
-    const roomId = socket.data.roomId;
-    if(!roomId) return;
-    rooms[roomId] = rooms[roomId].filter(user => user.userId !== socket.id);
-    if (
-    rooms[roomId] &&
-    rooms[roomId].length === 0
-) {
-    delete rooms[roomId];
-}
-    socket.to(roomId).emit(
-    "user-left",
-    {
-        userId: socket.id
-    }
-);
+   removeUser(socket);
 })
 
 
@@ -224,6 +211,13 @@ socket.on("offer" , ({target , offer})=>{
 
             }
         );
+        socket.on("disconnect", () => {
+    console.log(
+        "Disconnected:",
+        socket.id
+    );
+     removeUser(socket);
+});
 });
 
 
@@ -237,4 +231,23 @@ app.get("/check/:id" , (req ,res)=>{
         res.status(401).json({message : "Room does exist with this id"});
     }
 })
+
+ function removeUser(socket){
+        const roomId = socket.data.roomId;
+    if(!roomId) return;
+    rooms[roomId] = rooms[roomId].filter(user => user.userId !== socket.id);
+    if (
+    rooms[roomId] &&
+    rooms[roomId].length === 0
+) {
+    delete rooms[roomId];
+}
+    socket.to(roomId).emit(
+    "user-left",
+    {
+        userId: socket.id
+    }
+);
+}
+
 server.listen(8080);

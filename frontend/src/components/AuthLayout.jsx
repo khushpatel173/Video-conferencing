@@ -13,12 +13,12 @@ function AuthLayout({children,authentication=true}) {
         if(authentication && authStatus !== authentication){
             navigate("/login")
         } else if(!authentication && authStatus !== authentication){
+            console.log("Navigating to home");
             navigate("/")
         }
-    } , [authentication, authStatus , navigate]);
+    } , [authentication, authStatus , navigate , loading]);
     if(loading){
         console.log("loading");
-        
         return <h1>Loading...</h1>;
     }
        return <>{children}</>;

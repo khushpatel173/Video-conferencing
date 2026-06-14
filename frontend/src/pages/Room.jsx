@@ -8,6 +8,7 @@ import VideoPlayer from '../components/VideoPlayer';
 import { useNavigate } from 'react-router-dom';
 
 
+
 function Room() {
     const {isAudio , isVideo , stream , setIsAudio , setIsVideo , name , setStream} = useContext(MediaContext);
     const {roomId} = useParams();
@@ -77,7 +78,20 @@ function Room() {
 
     return pc;
 };
+
+ useEffect(() => {
+
+   if (!stream) {
+    console.log("Navigating to lobby");
+    navigate(`/lobby/${roomId}`);
+}
+
+}, [stream, roomId, navigate]);
+
     useEffect(()=>{
+        if(!stream){
+            return;
+        }
       socket.emit("join-room" , {
             roomId , name
         })  
@@ -156,10 +170,6 @@ socket.on("user-left" , ({userId})=>{
 
     const pc = peerConnections.current[userId];
     pc?.close();
-    stream?.getTracks()
-    .forEach(track =>
-        track.stop()
-    );
     delete peerConnections.current[userId];
     setParticipants(prev => {
         const updated = {...prev};
@@ -187,15 +197,21 @@ socket.on(
 
     }
 );
-
 return () => {
     socket.off("user-joined");
     socket.off("offer");
     socket.off("answer");
     socket.off("ice-candidate");
+    // if no strict mode then we can use this
+    // Object.values(peerConnections.current).forEach(pc => pc.close());
+
+    // stream?.getTracks().forEach(track => {
+    //   track.stop();
+    // });
 };
 
     } , []);
+   
 
         useEffect(() => {
     if(stream && localVideoRef.current){
@@ -230,15 +246,9 @@ return () => {
         socket.emit("leave-room");
           Object.values(peerConnections.current)
         .forEach(pc => pc.close());
-
         stream?.getTracks().forEach(track => {
-    console.log("Before:", track.readyState);
-
     track.stop();
-
-    console.log("After:", track.readyState);
 });
-      
         navigate("/");
         setStream(null);
     }
