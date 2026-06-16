@@ -1,9 +1,8 @@
 // this page should also be accessible if the user is logged in so we will wrap it arounf with the authLayout
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import authService from '../services/auth';
 import { useNavigate } from 'react-router-dom';
-
 function Home() {
     const [meetingId , setMeetingId] = useState('');
     const [loading, setLoading] = useState(false);

@@ -6,16 +6,19 @@ import { useParams } from 'react-router-dom';
 import { useRef } from 'react';
 import VideoPlayer from '../components/VideoPlayer';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux'
 
 
 
 function Room() {
     const {isAudio , isVideo , stream , setIsAudio , setIsVideo , name , setStream} = useContext(MediaContext);
     const {roomId} = useParams();
+    const [isHost , setIsHost] = useState(false);
     const localVideoRef = useRef(null);
     const peerConnections = useRef({});
     const [participants , setParticipants] = useState([]);
     const navigate = useNavigate();
+    const logged_user = useSelector((state) => state.auth.userData);
     const createPeerConnection = (userId) => {
 
     const pc = new RTCPeerConnection({
@@ -81,7 +84,7 @@ function Room() {
 
  useEffect(() => {
 
-   if (!stream) {
+   if (!stream && location.pathname === `/room/${roomId}`){
     console.log("Navigating to lobby");
     navigate(`/lobby/${roomId}`);
 }
@@ -93,7 +96,7 @@ function Room() {
             return;
         }
       socket.emit("join-room" , {
-            roomId , name
+            roomId , name , logged_user
         })  
         socket.on("user-joined" , async(data)=>{
             setParticipants(prev => ({
@@ -180,10 +183,13 @@ socket.on("user-left" , ({userId})=>{
 })
 socket.on(
     "existing-users",
-    (users) => {
-
+    ({users , host}) => {
+        
         const newParticipants = {};
 
+        setIsHost(host === logged_user._id)
+        console.log(host);
+        console.log(logged_user._id);
         users.forEach(user => {
 
             newParticipants[user.userId] = {
@@ -197,6 +203,24 @@ socket.on(
 
     }
 );
+socket.on("kicked", ()=>{
+
+    alert(
+        "You were removed from the meeting"
+    );
+
+    Object.values(
+        peerConnections.current
+    )
+    .forEach(pc => pc.close());
+
+    stream?.getTracks()
+    .forEach(track =>
+        track.stop()
+    );
+    setStream(null);
+    navigate("/");
+});
 return () => {
     socket.off("user-joined");
     socket.off("offer");
@@ -249,7 +273,7 @@ return () => {
         stream?.getTracks().forEach(track => {
     track.stop();
 });
-        navigate("/");
+        navigate("/");    
         setStream(null);
     }
   return (
@@ -261,7 +285,7 @@ return () => {
             </div>
             <div className="room-status">
                 <span className="status-dot"></span>
-                <p>{Object.keys(participants).length} in call</p>
+                <p>{Object.keys(participants).length + 1} in call</p>
             </div>
         </section>
 
@@ -293,10 +317,17 @@ return () => {
 
                 {
                     participant.stream &&
-                    (
+                    (<>
+                    {isHost && <button onClick={()=>{
+                        socket.emit("kick-user",{
+                                roomId,
+                                targetUserId: userId           })
+                    }}>Kick</button>}
                         <VideoPlayer
                             stream={participant.stream}
                         />
+                       
+                        </>
                     )
                 }
                 {!participant.stream && <div className="waiting-tile">Waiting for video</div>}

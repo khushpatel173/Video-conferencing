@@ -8,6 +8,7 @@ import cookieParser from 'cookie-parser';
 import { nanoid } from 'nanoid';
 import { Server } from 'socket.io';
 import http from 'http';
+import Room from './models/Room.js'
 const app = express();
 
 app.use(express.json());
@@ -141,27 +142,80 @@ const rooms = {};
 const server = http.createServer(app);
 
 const io = new Server(server , {cors : {
-    origin : "http://localhost:5173"
-}})
+    origin : "http://localhost:5173" , credentials : true
+}});
+io.use(async (socket, next) => {
+
+    try {
+        const cookieHeader =
+            socket.handshake.headers.cookie;
+
+        // extract your access token from cookies
+
+
+const token =
+    cookieHeader
+        ?.split("; ")
+        .find(row =>
+            row.startsWith("token=")
+        )
+        ?.split("=")[1];
+      
+        if (!token) {
+
+    return next(
+        new Error("No token")
+    );
+
+}
+        const decoded =
+            jwt.verify(
+                token,
+                "secret"
+            );
+        const user =
+            await User.findById(decoded.userId);
+
+        socket.data.user = user;
+
+        next();
+
+    } catch(error){
+
+        next(new Error("Unauthorized"));
+
+    }
+
+});
 
 
 io.on("connection", socket => {
-
     console.log(socket.id);
     socket.on(
     "join-room",
-    ({ roomId , name }) => {
+    async({ roomId , name}) => {
+        
+        let dbRoom =
+        await Room.findOne({ roomId });
 if (!rooms[roomId]) {
-        rooms[roomId] = [];
+        
+    if (!dbRoom) {
+
+        dbRoom = await Room.create({
+            roomId,
+            host: socket.data.user._id
+        });
+            
     }
-
+    rooms[roomId] = [];
+}
     const existingUsers = [...rooms[roomId]];
-
     socket.emit(
         "existing-users",
-        existingUsers
+       { users : existingUsers , 
+        host : dbRoom.host
+       }
     );
-
     rooms[roomId].push({
         userId: socket.id,
         name
@@ -175,6 +229,37 @@ if (!rooms[roomId]) {
         })
     }
 );
+socket.on("kick-user" , async({roomId , targetUserId})=>{
+        const room =
+    await Room.findOne({
+        roomId
+    });
+if (!room.host.equals(socket.data.user._id)) {
+    return;
+}
+
+        if (!room) return;
+        if(!rooms[roomId]) return;
+
+         const kickedSocket =
+            io.sockets.sockets.get(
+                targetUserId
+            );
+
+        kickedSocket?.leave(roomId);
+        delete kickedSocket.data.roomId;
+
+        rooms[roomId] = rooms[roomId].filter(user => user.userId !== targetUserId);
+       io.to(targetUserId).emit(
+    "kicked"
+);
+       
+        io.to(roomId).emit("user-left" , {
+            userId : targetUserId
+        })  
+
+})
+
 
 socket.on("leave-room" , ()=>{
    removeUser(socket);
@@ -235,6 +320,7 @@ app.get("/check/:id" , (req ,res)=>{
  function removeUser(socket){
         const roomId = socket.data.roomId;
     if(!roomId) return;
+     if(!rooms[roomId]) return;
     rooms[roomId] = rooms[roomId].filter(user => user.userId !== socket.id);
     if (
     rooms[roomId] &&
