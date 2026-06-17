@@ -175,7 +175,8 @@ const token =
             );
         const user =
             await User.findById(decoded.userId);
-
+        console.log(user);
+        
         socket.data.user = user;
 
         next();
@@ -194,7 +195,10 @@ io.on("connection", socket => {
     socket.on(
     "join-room",
     async({ roomId , name}) => {
-        
+//         console.log(
+//     "Authenticated:",
+//     socket.data.user
+// );
         let dbRoom =
         await Room.findOne({ roomId });
 if (!rooms[roomId]) {

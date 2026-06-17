@@ -3,6 +3,7 @@ import authService from '../services/auth'
 import { login } from '../../store/authSlice'
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import socket from '../services/socket';
 import './LoginForm.css'
 import { useState } from 'react';
 function LoginForm() {
@@ -13,6 +14,7 @@ function LoginForm() {
         try {
             setMessage("");
         const res = await authService.login(data);
+        socket.connect();
        dispatch(login(res.user));
        navigate('/');
         } catch(error) {
