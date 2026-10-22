@@ -74,7 +74,7 @@ function Room() {
     stream.getTracks().forEach(track => {
         pc.addTrack(track, stream);
     });
-}
+        }
         // if a connection is established use this track
 
     peerConnections.current[userId] = pc;
@@ -106,7 +106,7 @@ function Room() {
         stream: null
     }
 }));
-const pc = createPeerConnection(data.userId);
+        const pc = createPeerConnection(data.userId);
 // lets say b connected so it will send req to a and a will create peer connection and then a will give offer and at that time b will create its own pper connection
             // nwo we will send offer to b
             const offer = await pc.createOffer();
@@ -355,3 +355,5 @@ return () => {
   )
 }
 export default Room
+
+

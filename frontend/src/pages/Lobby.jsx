@@ -19,12 +19,15 @@ function Lobby() {
                 video: true,
                 audio: true
             });
-
+        // console.log(mediastream);
+        
         setStream(mediastream);
 
         if(videoRef.current){
     videoRef.current.srcObject = mediastream;
 }
+    console.log(videoRef.current);
+    
 
         setIsVideo(
             mediastream.getVideoTracks()[0].enabled

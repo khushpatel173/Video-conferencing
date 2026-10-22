@@ -36,11 +36,6 @@ main()
 //     console.log("Listening to the port" , PORT);    
 // });
 
-
-app.get("/" , (req , res)=>{
-   res.send("hey there");
-})
-
 app.post("/signup" , async(req , res)=>{
     try {
          const {username , email , password} = req.body;
@@ -76,6 +71,7 @@ app.post("/login" , async(req ,res)=>{
     if(!isMatch){
       return res.status(401).json({message : "Incorrect password"});
     }
+    // if we are here we know that the pass matches
     const token = jwt.sign({
         userId : user._id
     } , "secret" , {expiresIn: "1d"});
@@ -133,10 +129,10 @@ app.post("/logout" , (req ,res)=>{
 
 app.get("/generateId" ,(req ,res)=>{
     // generate a id and send in the response
-
     const roomId = nanoid(6);
     res.json({roomId : roomId});
 })
+
 
 const rooms = {};
 const server = http.createServer(app);
@@ -149,8 +145,6 @@ io.use(async (socket, next) => {
     try {
         const cookieHeader =
             socket.handshake.headers.cookie;
-
-        // extract your access token from cookies
 
 
 const token =
@@ -216,7 +210,8 @@ if (!rooms[roomId]) {
     const existingUsers = [...rooms[roomId]];
     socket.emit(
         "existing-users",
-       { users : existingUsers , 
+       { 
+        users : existingUsers , 
         host : dbRoom.host
        }
     );
@@ -224,6 +219,9 @@ if (!rooms[roomId]) {
         userId: socket.id,
         name
     });
+    console.log(roomId);
+    
+        console.log(rooms[roomId]);
         socket.join(roomId);
         socket.data.name = name;
         socket.data.roomId = roomId;
@@ -313,11 +311,14 @@ socket.on("offer" , ({target , offer})=>{
 app.get("/check/:id" , (req ,res)=>{
     const {id} = req.params;
     // check if this id is in rooms or not
+
+    console.log(rooms[id]);
+    
     if(rooms[id]){
-        res.status(200).json({message : "Room exist with this id"});
+        res.status(201).json({message : "Room exist with this id"});
     }
     else{
-        res.status(401).json({message : "Room does exist with this id"});
+        res.status(401).json({message : "Room does not exist with this id"});
     }
 })
 
